@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const { PassThrough } = require('stream');
 class Server{
     constructor(){
         this.app = express();
@@ -10,8 +9,7 @@ class Server{
         this.routes();
     }
     routes(){
-        // this.app.use("/carroussel", require('../routes/carroussel.controller.js'));
-        this.app.use('/forms', require('../routes/form.routes'));
+        this.app.use('/prueba', require('../routes/pruebas.routes'));
     }
     middlewares(){
         this.app.use(cors());
@@ -19,7 +17,7 @@ class Server{
     }
     listen(){
         this.server.listen(this.port, () =>{
-            console.log("Server running on port", this.port);
+            console.log("The fucking service is running :v in", this.port);
         })
     }
 }
