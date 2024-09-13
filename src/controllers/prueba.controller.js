@@ -184,6 +184,226 @@ async function getZeroStock(req = request, res = response) {
         });
     }
 }
+async function entradasTime(req = request, res = response) {
+    try {
+        const fecha = req.body.fecha;
+        const verifyTable = await database.execute({
+            sql: `SELECT * FROM entradas WHERE fecha = ?`,
+            args: [ fecha ],
+        })
+        const table = verifyTable.rows;
+        if (table.length === 0) {
+            return res.status(200).json({
+                message: "No existen registros en esa fecha",
+                table,
+            })
+            
+        }
+        return res.status(200).json({
+            message: "Las entradas de esa fecha son:",
+            table,
+        })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Error",
+            error,
+        })
+    }
+}
+async function ventasTime(req = request, res = response) {
+    try {
+        const fecha = req.body.fecha;
+        const verifyTable = await database.execute({
+            sql: `SELECT * FROM ventas WHERE fecha = ?`,
+            args: [fecha],
+        })
+        const table = verifyTable.rows;
+        if (table.length === 0) {
+            return res.status(200).json({
+                message: "No existen registros en esa fecha",
+                table,
+            })
+            
+        }
+        return res.status(200).json({
+            message: "Las ventas de esa fecha son:",
+            table,
+        })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Error",
+            error,
+        })
+    }
+}
+async function viewProduct(req = request, res = response) {
+    try {
+        const nombre = req.body.nombre;
+        const verifyTable = await database.execute({
+            sql: `SELECT * FROM productos WHERE nombre = ?`,
+            args: [nombre],
+        })
+        const table = verifyTable.rows;
+        if(table.length === 0){
+            return res.status(200).json({
+                message: "No existen registros con ese nombre",
+                table,
+            })
+        }
+        return res.status(200).json({
+            message: "Los datos de ese producto son: ",
+            table,
+        })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Error",
+            error,
+        })
+    }
+}
+async function viewNameProduct(req = request, res = response) {
+    try {
+        const id = req.body.id;
+        const verifyTable = await database.execute({
+            sql: `SELECT * FROM productos WHERE id_producto = ?`,
+            args: [id],
+        })
+        const table = verifyTable.rows;
+        if(table.length === 0){
+            return res.status(200).json({
+                message: "No existen productos con ese id",
+                table,
+            })
+        }
+        return res.status(200).json({
+            message: "El nombre de ese id es: ",
+            table,
+        })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Error",
+            error,
+        })
+    }
+}
+async function updateNameProduct(req = request, res = response) {
+    const { id } = req.params;
+    try {
+        const verifyTable = await database.execute({
+            sql: `SELECT * FROM productos WHERE id_producto = ?`,
+            args: [id],
+        })
+        const table = verifyTable.rows;
+        if(table.length === 0){
+            return res.status(200).json({
+                message: "No existen productos con ese id",
+                table,
+            })
+        }
+        const update = newParseUpdateArray("productos", req.body, {value: id, index: "id_producto"});//El value id es la varible de acuerdo a que se actualizara, y lo que esta en index es la columna de la tabla en la cual nos basaremos para hacer el cambio
+        await database.batch(update, "write");
+        return res.status(200).json({
+            message: "Nombre actualizado",
+            update
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Error",
+            error,
+        })
+    }
+}
+async function deleteProduct(req = request, res = response) {
+    const { id } = req.params;
+    try {
+        const verifyTable = await database.execute({
+            sql: `SELECT * FROM productos WHERE id_producto = ?`,
+            args: [id],
+        })
+        const table = verifyTable.rows;
+        if(table.length === 0){
+            return res.status(400).json({
+                message: "No existen productos con ese id",
+                table,
+            })
+        }
+        await database.batch([{
+            sql: `DELETE FROM productos WHERE id_producto = ?`,
+            args: [ id ],
+        }], "write");
+        return res.status(200).json({
+            message: "Producto borrado",
+        })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Error",
+            error,
+        })
+    }
+}
+async function deleteVentasTime(req = request, res = response) {
+    try {
+        const fecha = req.body.fecha;
+        const verifyTable = await database.execute({
+            sql: `SELECT * FROM ventas WHERE fecha = ?`,
+            args: [fecha],
+        })
+        const table = verifyTable.rows;
+        if (table.length === 0) {
+            return res.status(200).json({
+                message: "No existen registros en esa fecha",
+                table,
+            })
+            
+        }
+        await database.batch([{
+            sql: `DELETE FROM ventas WHERE fecha = ?`,
+            args: [ fecha ],
+        }], "write");
+        return res.status(200).json({
+            message: "Producto borrado",
+        })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Error",
+            error,
+        })
+    }
+}
+async function deleteDataEntradas(req = request, res = response) {
+    try {
+        const verifyTable = await database.execute(
+            `SELECT * FROM entradas`
+        )
+        const table = verifyTable.rows;
+        if (table.length === 0) {
+            console.log("MENSAJE");
+            return res.status(200).json({
+                message: "La tabla ya esta vacia",
+                table,
+            })
+        }
+        await database.batch([
+            `DELETE FROM entradas`
+        ], "write");
+        return res.status(200).json({
+            message: "Datos borrados",
+        })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Error",
+            error,
+        })
+    }
+}
 module.exports = {
     insertNewProduct,
     insertNewEntrada,
@@ -192,4 +412,12 @@ module.exports = {
     getEntradas,
     getVentas,
     getZeroStock,
+    entradasTime,
+    ventasTime,
+    viewProduct,
+    viewNameProduct,
+    updateNameProduct,
+    deleteProduct,
+    deleteVentasTime,
+    deleteDataEntradas,
 };
